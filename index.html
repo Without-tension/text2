@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #7e967e;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input[type="text"], input[type="number"], button {
+            width: 300px;
+            height: 43px;
+            font-size: 25px;
+            background-color: rgba(255, 255, 255, 0.5);
+            margin: 0;
+            padding: 0;
+        }
+        button {
+            height: 60px;
+            cursor: pointer;
+        }
+        .blue {
+            color: blue;
+        }
+        .red {
+            color: red;
+        }
+        .purple {
+            color: purple;
+        }
+        #myText, #myText2, #myText3, #myText4, #myText5, #myText6, #myText7, #myText8 {
+            text-indent: 100px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        label {
+            font-size: 16px;
+            margin: 0;
+            padding: 0;
+        }
+        @media (max-width: 1768px) {
+            .container {
+                max-width: 2000px; /* Повернуто до початкового значення */
+            }
+            input[type="text"], input[type="number"], button {
+                width: 600px; /* Повернуто до початкового значення */
+                height: 87px; /* Повернуто до початкового значення для input */
+                font-size: 50px; /* Повернуто до початкового значення */
+            }
+            button {
+                height: 120px; /* Повернуто до початкового значення */
+            }
+            #myText, #myText2, #myText3, #myText4, #myText5, #myText6, #myText7, #myText8 {
+                font-size: 35px; /* Повернуто до початкового значення */
+            }
+            label {
+                font-size: 31px; /* Повернуто до початкового значення */
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <p id="myText" onclick="copyText('myText')">Купіть "гравець" ("ринкова ціна"), виставте його з мінімальною ціною "-"к і максимальною ціною "-"к. Надішліть скрін будь ласка</p>
+    <label for="word">Гравець:</label>
+    <input type="text" id="word" name="word">
+    <label for="firstNumber">Ринкова ціна:</label>
+    <input type="number" id="firstNumber" name="firstNumber">
+    <label for="sellnumber">Замовлення:</label>
+    <input type="number" id="sellnumber" name="sellnumber"><br>
+    <p id="myText4" onclick="copyText('myText4')">Купіть "гравець" ("ринкова ціна"), виставте його з мінімальною ціною "-"к і максимальною ціною "-"к. Надішліть скрін будь ласка</p>
+    <button onclick="changeText()">Розрахувати та змінити текст</button><br>
+    <label for="secondNumber">Мінімальна ціна:</label>
+    <input type="number" id="secondNumber" name="secondNumber" class="red">
+    <label for="thirdNumber">Максимальна ціна:</label>
+    <input type="number" id="thirdNumber" name="thirdNumber" class="red"><br>
+    <p id="myText2" onclick="copyText('myText2')">На ринку є "гравець" з мінімальною ціною "-"к і максимальною ціною "-"к. Викупіть його та надішліть скрін будь ласка</p>
+    <label for="forNumber">Максимальна ціна для ставки:</label>
+    <input type="number" id="forNumber" name="forNumber"><br>
+    <p id="myText3" onclick="copyText('myText3')">На ринку є "гравець" з мінімальною ціною "-"к і максимальною ціною "-"к. Поставте ставку "-"к та надішліть скрін будь ласка</p><br>
+    <p id="myText5" onclick="copyText('myText5')">Доброго дня, буде замовлення, потрібно <strong id="maxPriceDisplay"></strong>к монет. Зможете забрати?</p><br>
+    <p id="myText6" onclick="copyText('myText6')">Доброго дня, Ви купуєте карту яку ми для Вас підберемо під Ваші потреби, виставляєте її по наших цінах і ми її викуповуємо.<br>
+        До прикладу: у Вас на облiковому записi 25 тисяч i Ви замовили 100 тисяч. Ви купуєте гравця за 25 тисяч, а виставляєте його за 132 тисячі (ми також покриваємо комiсiю ЕА).
+        На цiй рiзницi ми перевели вам рiвно 100 тисяч</p><br>
+    <p id="myText7" onclick="copyText('myText7')">
+        Доброго дня, актуальний курс монет можете переглядати на нашому сайті - mutualcoins.store<br>
+        На даний момент ціна на ПК - 130 грн за 100к,
+        на консоль - 145 грн за 100к</p><br>
+    <p id="myText8" onclick="copyText('myText8')">Доброго дня, працюємо при наявності замовлень.
+        Повідомимо Вам коли надійде пропозиція.<br>
+        Курс на консоль - 65 грн за 100к,
+        на ПК - 50 грн за 100к (також завжди покриваємо комісію ЕА)</p><br>
+</div>
+<div id="result"></div>
+<script>
+    // Оголошення функції для обчислення X7
+    function calculateX7(firstNumber, sellnumber) {
+        // Розрахунок X3
+        var X3 = firstNumber + sellnumber;
+        // Розрахунок X4
+        var X4 = X3 * 0.05;
+        // Розрахунок X5
+        var X5 = X4 + X3;
+        // Розрахунок X6
+        var X6 = X5 * 0.05;
+        // Розрахунок X7
+        var thirdNumber = Math.ceil(X6 + X3);
+        return thirdNumber;
+    }
+
+    function changeText() {
+        var word = document.getElementById("word").value;
+        var firstNumber = parseFloat(document.getElementById("firstNumber").value);
+        var sellnumber = parseFloat(document.getElementById("sellnumber").value);
+        var secondNumber = parseFloat(document.getElementById("secondNumber").value);
+        var secondNumberElement = document.getElementById("secondNumber");
+        var thirdNumberElement = document.getElementById("thirdNumber");
+        var thirdNumber = parseFloat(thirdNumberElement.value);
+        var forNumber = parseFloat(document.getElementById("forNumber").value);
+        var myText = document.getElementById("myText");
+        var myText2 = document.getElementById("myText2");
+        var myText3 = document.getElementById("myText3");
+        var myText4 = document.getElementById("myText4");
+        var maxPriceDisplay = document.getElementById("maxPriceDisplay");
+
+        // Генеруємо випадкове число від "ринкової ціни" до 40% від "замовлення"
+        var minPrice = firstNumber;
+        var maxPrice = firstNumber + (sellnumber * 0.4);
+        var randomPrice = Math.floor(Math.random() * (maxPrice - minPrice + 1)) + minPrice;
+
+        var result_thirdNumber = calculateX7(firstNumber, sellnumber);
+        thirdNumberElement.value = result_thirdNumber; // Оновлюємо значення "максимальна ціна"
+        secondNumberElement.value = randomPrice; // Оновлюємо значення "мінімальна ціна"
+        maxPriceDisplay.innerHTML = result_thirdNumber;
+
+        myText.innerHTML = "Купіть " + word + " (до " + firstNumber + "к), виставте його з мінімальною ціною " + randomPrice + "к і максимальною ціною " + result_thirdNumber + "к. Надішліть скрін будь ласка";
+        myText.className = "blue";
+        myText2.innerHTML = "На ринку є " + word + " з мінімальною ціною " + randomPrice + "к і максимальною ціною " + result_thirdNumber + "к. Викупіть його та надішліть скрін будь ласка";
+        myText2.className = "blue";
+        myText3.innerHTML = "На ринку є " + word + " з мінімальною ціною " + randomPrice + "к і максимальною ціною " + result_thirdNumber + "к. Поставте ставку " + forNumber + "к та надішліть скрін будь ласка";
+        myText3.className = "blue";
+        myText4.innerHTML = "Купіть " + word + " (до " + firstNumber + "к), виставте його з мінімальною ціною " + randomPrice + "к і максимальною ціною " + result_thirdNumber + "к. Надішліть скрін будь ласка";
+        myText4.className = "blue";
+    }
+
+    function copyText(elementId) {
+        var text = document.getElementById(elementId).innerText;
+        var textarea = document.createElement("textarea");
+        textarea.textContent = text;
+        textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            if (document.execCommand("copy")) {
+                document.getElementById(elementId).className = "purple";
+            }
+        } catch (ex) {
+            console.warn("Copy to clipboard failed.", ex);
+            return false;
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
+    // Читаємо дані з localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+        var playerData = localStorage.getItem('playerData');
+        if (playerData) {
+            // Заповнюємо поля
+            document.getElementById('word').value = playerData;
+            document.getElementById('secondNumber').value = playerData;
+
+            // Очищуємо localStorage після зчитування даних
+            localStorage.removeItem('playerData');
+        }
+    });
+</script>
+</body>
+</html>

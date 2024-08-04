@@ -10,64 +10,60 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #7e967e;
+            background-image: url('fon.jpg');
+            background-size: cover; /* Зображення покриває весь фон */
+            background-position: center; /* Центрує зображення */
+            background-repeat: no-repeat; /* Запобігає повторенню зображення */
+            background-attachment: fixed; /* Закріплює фон на місці */
             font-family: Arial, sans-serif;
+            transform: scale(0.4);
+            transform-origin: top center;
+            color: white;
         }
+
         .container {
-            max-width: 1000px;
+            max-width: 2000px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         input[type="text"], input[type="number"], button {
-            width: 300px;
-            height: 43px;
-            font-size: 25px;
+            width: 600px;
+            height: 87px;
+            font-size: 50px;
             background-color: rgba(255, 255, 255, 0.5);
             margin: 0;
             padding: 0;
+            font-weight: bold;
         }
         button {
-            height: 60px;
+            height: 120px;
             cursor: pointer;
         }
         .blue {
-            color: blue;
+            color:#b8bdff;
         }
         .red {
-            color: red;
+            color: #d51717;
         }
         .purple {
-            color: purple;
+            color: #d68fd4;
         }
         #myText, #myText2, #myText3, #myText4, #myText5, #myText6, #myText7, #myText8 {
             text-indent: 100px;
-            font-size: 18px;
+            font-size: 35px;
             cursor: pointer;
         }
         label {
-            font-size: 16px;
+            font-size: 31px;
             margin: 0;
             padding: 0;
+            color: white;
         }
-        @media (max-width: 1768px) {
-            .container {
-                max-width: 2000px; /* Повернуто до початкового значення */
-            }
-            input[type="text"], input[type="number"], button {
-                width: 600px; /* Повернуто до початкового значення */
-                height: 87px; /* Повернуто до початкового значення для input */
-                font-size: 50px; /* Повернуто до початкового значення */
-            }
-            button {
-                height: 120px; /* Повернуто до початкового значення */
-            }
-            #myText, #myText2, #myText3, #myText4, #myText5, #myText6, #myText7, #myText8 {
-                font-size: 35px; /* Повернуто до початкового значення */
-            }
-            label {
-                font-size: 31px; /* Повернуто до початкового значення */
+        @media (max-width: 1200px) {
+            body {
+                transform: scale(0.9);
             }
         }
     </style>

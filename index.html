@@ -11,10 +11,10 @@
             height: 100vh;
             margin: 0;
             background-image: url('fon.jpg');
-            background-size: cover; /* Зображення покриває весь фон */
-            background-position: center; /* Центрує зображення */
-            background-repeat: no-repeat; /* Запобігає повторенню зображення */
-            background-attachment: fixed; /* Закріплює фон на місці */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             font-family: Arial, sans-serif;
             transform: scale(0.4);
             transform-origin: top center;
@@ -28,6 +28,7 @@
             flex-direction: column;
             align-items: center;
         }
+
         input[type="text"], input[type="number"], button {
             width: 600px;
             height: 87px;
@@ -36,6 +37,7 @@
             margin: 0;
             padding: 0;
             font-weight: bold;
+            text-align: center;
         }
         button {
             height: 120px;
@@ -61,44 +63,126 @@
             padding: 0;
             color: white;
         }
+
         @media (max-width: 1200px) {
             body {
                 transform: scale(0.9);
             }
         }
+
+        /* Новий стиль для кнопок + та - */
+        .button-style {
+            width: 60px;
+            height: 87px;
+            font-size: 50px;
+            background-color: #2b2ba0;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 0 5px;
+            padding: 0;
+        }
+        .input-number-style {
+            width: 90px !important;
+            height: 87px !important;
+            font-size: 50px !important;
+            background-color: rgba(255, 255, 255, 0.5) !important;
+            margin: 0 10px !important;
+            padding: 0 !important;
+            font-weight: bold !important;
+            color: #2b2ba0 !important;
+            text-align: center !important;
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <p id="myText" onclick="copyText('myText')">Купіть "гравець" ("ринкова ціна"), виставте його з мінімальною ціною "-"к і максимальною ціною "-"к. Надішліть скрін будь ласка</p>
+
+    <p id="myText" onclick="copyText('myText')">
+        Купіть "гравець" ("ринкова ціна"), виставте його з мінімальною ціною "-"к і максимальною цією "-"к.
+        Надішліть скрін будь ласка
+    </p>
+
     <label for="word">Гравець:</label>
     <input type="text" id="word" name="word">
     <label for="firstNumber">Ринкова ціна:</label>
     <input type="number" id="firstNumber" name="firstNumber">
     <label for="sellnumber">Замовлення:</label>
     <input type="number" id="sellnumber" name="sellnumber"><br>
-    <p id="myText4" onclick="copyText('myText4')">Купіть "гравець" ("ринкова ціна"), виставте його з мінімальною ціною "-"к і максимальною ціною "-"к. Надішліть скрін будь ласка</p>
-    <button onclick="changeText()">Розрахувати та змінити текст</button><br>
+
+    <p id="myText4" onclick="copyText('myText4')">
+        Купіть "гравець" ("ринкова ціна"), виставте його з мінімальною ціною "-"к і максимальною цією "-"к.
+        Надішліть скрін будь ласка
+    </p>
+
+    <button onclick="changeText()">
+        Розрахувати та змінити текст
+    </button><br>
+
     <label for="secondNumber">Мінімальна ціна:</label>
     <input type="number" id="secondNumber" name="secondNumber" class="red">
     <label for="thirdNumber">Максимальна ціна:</label>
     <input type="number" id="thirdNumber" name="thirdNumber" class="red"><br>
-    <p id="myText2" onclick="copyText('myText2')">На ринку є "гравець" з мінімальною ціною "-"к і максимальною ціною "-"к. Викупіть його та надішліть скрін будь ласка</p>
+
+    <p id="myText2" onclick="copyText('myText2')">
+        На ринку є "гравець" з мінімальною ціною "-"к і максимальноальною цією "-"к.
+        Викупіть його та надішліть скрін будь ласка
+    </p>
+
     <label for="forNumber">Максимальна ціна для ставки:</label>
     <input type="number" id="forNumber" name="forNumber"><br>
-    <p id="myText3" onclick="copyText('myText3')">На ринку є "гравець" з мінімальною ціною "-"к і максимальною ціною "-"к. Поставте ставку "-"к та надішліть скрін будь ласка</p><br>
-    <p id="myText5" onclick="copyText('myText5')">Доброго дня, буде замовлення, потрібно <strong id="maxPriceDisplay"></strong>к монет. Зможете забрати?</p><br>
-    <p id="myText6" onclick="copyText('myText6')">Доброго дня, Ви купуєте карту яку ми для Вас підберемо під Ваші потреби, виставляєте її по наших цінах і ми її викуповуємо.<br>
-        До прикладу: у Вас на облiковому записi 25 тисяч i Ви замовили 100 тисяч. Ви купуєте гравця за 25 тисяч, а виставляєте його за 132 тисячі (ми також покриваємо комiсiю ЕА).
-        На цiй рiзницi ми перевели вам рiвно 100 тисяч</p><br>
+
+    <p id="myText3" onclick="copyText('myText3')">
+        На ринку є "гравець" з мінімальною ціною "-"к і максимальноальною цією "-"к.
+        Поставте ставку "-"к та надішліть скрін будь ласка
+    </p><br>
+
+    <p id="myText5" onclick="copyText('myText5')">
+        Доброго дня, буде замовлення, потрібно <strong id="maxPriceDisplay"></strong>к монет. Зможете забрати?
+    </p><br>
+
+    <p id="myText6" onclick="copyText('myText6')">
+        Доброго дня, Ви купуєте карту яку ми для Вас підберемо під Ваші потреби,
+        виставляєте її по наших цінах і ми її викуповуємо.<br>
+        До прикладу: у Вас на облiковому записi 25 тисяч i Ви замовили 100 тисяч.
+        Ви купуєте гравця за 25 тисяч, а виставляєте його за 132 тисячі (ми також покриваємо комiсiю ЕА).
+        На цiй рiзницi ми перевели вам рiвно 100 тисяч
+    </p><br>
+
+    <!-- Поля для редагування значень ціни -->
+    <div class="input-group">
+        <label for="pcPrice">Ціна на ПК:</label>
+        <button class="button-style" onclick="changeValue('pcPrice', -1)">-</button>
+        <input type="number" id="pcPrice" value="130" class="input-number-style">
+        <button class="button-style" onclick="changeValue('pcPrice', 1)">+</button>
+        <label for="consolePrice">Ціна на консоль:</label>
+        <button class="button-style" onclick="changeValue('consolePrice', -1)">-</button>
+        <input type="number" id="consolePrice" value="145" class="input-number-style">
+        <button class="button-style" onclick="changeValue('consolePrice', 1)">+</button>
+    </div>
+
     <p id="myText7" onclick="copyText('myText7')">
         Доброго дня, актуальний курс монет можете переглядати на нашому сайті - mutualcoins.store<br>
-        На даний момент ціна на ПК - 130 грн за 100к,
-        на консоль - 145 грн за 100к</p><br>
-    <p id="myText8" onclick="copyText('myText8')">Доброго дня, працюємо при наявності замовлень.
-        Повідомимо Вам коли надійде пропозиція.<br>
-        Курс на консоль - 65 грн за 100к,
-        на ПК - 50 грн за 100к (також завжди покриваємо комісію ЕА)</p><br>
+        На даний момент ціна на ПК - <span id="pcPriceDisplay">130</span> грн за 100к,<br>
+        на консоль - <span id="consolePriceDisplay">145</span> грн за 100к
+    </p><br>
+
+    <div class="input-group">
+        <label for="consoleRate">Курс на консоль:</label>
+        <button class="button-style" onclick="changeValue('consoleRate', -1)">-</button>
+        <input type="number" id="consoleRate" value="65" class="input-number-style">
+        <button class="button-style" onclick="changeValue('consoleRate', 1)">+</button>
+        <label for="pcRate">Курс на ПК:</label>
+        <button class="button-style" onclick="changeValue('pcRate', -1)">-</button>
+        <input type="number" id="pcRate" value="50" class="input-number-style">
+        <button class="button-style" onclick="changeValue('pcRate', 1)">+</button>
+    </div>
+
+    <p id="myText8" onclick="copyText('myText8')">
+        Доброго дня, працюємо при наявності замовлень. Повідомимо Вам коли надійде пропозиція.<br>
+        Курс на консоль - <span id="consoleRateDisplay">65</span> грн за 100к,<br>
+        на ПК - <span id="pcRateDisplay">50</span> грн за 100к (також завжди покриваємо комісію ЕА)
+    </p><br>
 </div>
 <div id="result"></div>
 <script>
@@ -182,6 +266,92 @@
             localStorage.removeItem('playerData');
         }
     });
+    function updatePrices() {
+        var pcPrice = document.getElementById("pcPrice").value;
+        var consolePrice = document.getElementById("consolePrice").value;
+
+        localStorage.setItem("pcPrice", pcPrice);
+        localStorage.setItem("consolePrice", consolePrice);
+
+        document.getElementById("pcPriceDisplay").innerText = pcPrice;
+        document.getElementById("consolePriceDisplay").innerText = consolePrice;
+    }
+
+    function updateRates() {
+        var consoleRate = document.getElementById("consoleRate").value;
+        var pcRate = document.getElementById("pcRate").value;
+
+        localStorage.setItem("consoleRate", consoleRate);
+        localStorage.setItem("pcRate", pcRate);
+
+        document.getElementById("consoleRateDisplay").innerText = consoleRate;
+        document.getElementById("pcRateDisplay").innerText = pcRate;
+    }
+
+    function changeValue(id, delta) {
+        var input = document.getElementById(id);
+        var newValue = parseInt(input.value) + delta;
+        if (newValue >= 0) { // Перевірка, щоб значення не ставало від'ємним
+            input.value = newValue;
+            if (id.includes("Price")) {
+                updatePrices();
+            } else {
+                updateRates();
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var savedPcPrice = localStorage.getItem("pcPrice");
+        var savedConsolePrice = localStorage.getItem("consolePrice");
+        var savedConsoleRate = localStorage.getItem("consoleRate");
+        var savedPcRate = localStorage.getItem("pcRate");
+
+        if (savedPcPrice !== null) {
+            document.getElementById("pcPrice").value = savedPcPrice;
+            document.getElementById("pcPriceDisplay").innerText = savedPcPrice;
+        }
+
+        if (savedConsolePrice !== null) {
+            document.getElementById("consolePrice").value = savedConsolePrice;
+            document.getElementById("consolePriceDisplay").innerText = savedConsolePrice;
+        }
+
+        if (savedConsoleRate !== null) {
+            document.getElementById("consoleRate").value = savedConsoleRate;
+            document.getElementById("consoleRateDisplay").innerText = savedConsoleRate;
+        }
+
+        if (savedPcRate !== null) {
+            document.getElementById("pcRate").value = savedPcRate;
+            document.getElementById("pcRateDisplay").innerText = savedPcRate;
+        }
+    });
+
+    document.getElementById("pcPrice").addEventListener("input", updatePrices);
+    document.getElementById("consolePrice").addEventListener("input", updatePrices);
+
+    document.getElementById("consoleRate").addEventListener("input", updateRates);
+    document.getElementById("pcRate").addEventListener("input", updateRates);
+
+    function copyText(elementId) {
+        var text = document.getElementById(elementId).innerText;
+        var textarea = document.createElement("textarea");
+        textarea.textContent = text;
+        textarea.style.position = "fixed";
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            if (document.execCommand("copy")) {
+                document.getElementById(elementId).className = "purple";
+            }
+        } catch (ex) {
+            console.warn("Copy to clipboard failed.", ex);
+            return false;
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
 </script>
 </body>
 </html>

@@ -52,7 +52,7 @@
         .purple {
             color: #d68fd4;
         }
-        #myText, #myText2, #myText3, #myText4, #myText5, #myText6, #myText7, #myText8 {
+        #myText, #myText2, #myText3, #myText4, #myText5, #myText6, #myText7, #myText8, #myText9, #myText10 {
             text-indent: 100px;
             font-size: 35px;
             cursor: pointer;
@@ -91,6 +91,29 @@
             padding: 0 !important;
             font-weight: bold !important;
             color: #2b2ba0 !important;
+            text-align: center !important;
+        }
+        .price-group.special .special-btn {
+            width: 60px;
+            height: 87px;
+            font-size: 50px;
+            background-color: #01402E;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 0 5px;
+            padding: 0;
+        }
+
+        .price-group.special .special-number {
+            width: 105px !important;
+            height: 87px !important;
+            font-size: 50px !important;
+            background-color: rgba(255, 255, 255, 0.5) !important;
+            margin: 0 10px !important;
+            padding: 0 !important;
+            font-weight: bold !important;
+            color: #01402E !important;
             text-align: center !important;
         }
     </style>
@@ -137,8 +160,21 @@
         Поставте ставку "-"к та надішліть скрін будь ласка
     </p><br>
 
+    <div class="price-group special">
+        <label for="rate">Актуальний курс:</label>
+        <button class="special-btn" onclick="changeValue('rate', -5)">-</button>
+        <input type="number" id="rate" value="105" class="special-number">
+        <button class="special-btn" onclick="changeValue('rate', 5)">+</button>
+    </div>
+
     <p id="myText5" onclick="copyText('myText5')">
-        Доброго дня, буде замовлення, потрібно <strong id="maxPriceDisplay"></strong>к монет. Зможете забрати?
+        Доброго дня, буде замовлення, потрібно <strong id="maxPriceDisplay"></strong>к монет, курс
+        <span id="rateDisplay"></span>грн за 100к. Зможете забрати?
+    </p><br>
+
+    <p id="myText9" onclick="copyText('myText9')">
+        "-" - "-" (ціна карти яка у Вас залишилась) = "-"<br><br>
+        "-" = "-" грн
     </p><br>
 
     <p id="myText6" onclick="copyText('myText6')">
@@ -183,6 +219,12 @@
         Курс на консоль - <span id="consoleRateDisplay">65</span> грн за 100к,<br>
         на ПК - <span id="pcRateDisplay">50</span> грн за 100к (також завжди покриваємо комісію ЕА)
     </p><br>
+
+    <p id="myText10" onclick="copyText('myText10')">
+        Ми інформуємо Вас про нове замовлення.
+        Якщо на Вашому балансі є необхідна сума, ми надсилаємо карту, яку потрібно викупити.
+        Після цього Ви її викуповуєте та надсилаєте скрін для підтвердження.
+    </p><br>
 </div>
 <div id="result"></div>
 <script>
@@ -210,30 +252,43 @@
         var thirdNumberElement = document.getElementById("thirdNumber");
         var thirdNumber = parseFloat(thirdNumberElement.value);
         var forNumber = parseFloat(document.getElementById("forNumber").value);
+        var rate = parseFloat(document.getElementById("rate").value);
         var myText = document.getElementById("myText");
         var myText2 = document.getElementById("myText2");
         var myText3 = document.getElementById("myText3");
         var myText4 = document.getElementById("myText4");
         var maxPriceDisplay = document.getElementById("maxPriceDisplay");
+        var myText5 = document.getElementById("myText5");
+        var myText9 =document.getElementById("myText9");
 
-        // Генеруємо випадкове число від "ринкової ціни" до 40% від "замовлення"
+        // Генеруємо випадкове число від "ринкової ціни" до 10% від "замовлення"
         var minPrice = firstNumber;
-        var maxPrice = firstNumber + (sellnumber * 0.4);
+        var maxPrice = firstNumber + (sellnumber * 0.1);
         var randomPrice = Math.floor(Math.random() * (maxPrice - minPrice + 1)) + minPrice;
 
         var result_thirdNumber = calculateX7(firstNumber, sellnumber);
         thirdNumberElement.value = result_thirdNumber; // Оновлюємо значення "максимальна ціна"
         secondNumberElement.value = randomPrice; // Оновлюємо значення "мінімальна ціна"
-        maxPriceDisplay.innerHTML = result_thirdNumber;
+        maxPriceDisplay.innerText = result_thirdNumber; // Вставка значення в текст
+        var difference = thirdNumber - firstNumber;
+        var calculation = (difference * rate)/100;
+        // Оновлення курсу в тексті
+        rateDisplay.innerText = rate;
+
 
         myText.innerHTML = "Купіть " + word + " (до " + firstNumber + "к), виставте його з мінімальною ціною " + randomPrice + "к і максимальною ціною " + result_thirdNumber + "к. Надішліть скрін будь ласка";
         myText.className = "blue";
         myText2.innerHTML = "На ринку є " + word + " з мінімальною ціною " + randomPrice + "к і максимальною ціною " + result_thirdNumber + "к. Викупіть його та надішліть скрін будь ласка";
         myText2.className = "blue";
-        myText3.innerHTML = "На ринку є " + word + " з мінімальною ціною " + randomPrice + "к і максимальною ціною " + result_thirdNumber + "к. Поставте ставку " + forNumber + "к та надішліть скрін будь ласка";
+        myText3.innerHTML = "На ринку є " + word + " з мінімальною ціною " + randomPrice + "к і максимальною ціною " + forNumber + "к. Поставте ставку " + result_thirdNumber + "к та надішліть скрін будь ласка";
         myText3.className = "blue";
-        myText4.innerHTML = "Купіть " + word + " (до " + firstNumber + "к), виставте його з мінімальною ціною " + randomPrice + "к і максимальною ціною " + result_thirdNumber + "к. Надішліть скрін будь ласка";
+        myText4.innerHTML = "Купіть " + word + " (до " + firstNumber + "к), виставте його НА 1 ГОДИНУ з мінімальною ціною " + randomPrice + "к і максимальною ціною " + forNumber + "к. Надішліть скрін будь ласка";
         myText4.className = "blue";
+        myText5.className = "blue";
+        myText9.className = "blue";
+        myText9.innerHTML = thirdNumber + " - " + firstNumber + " (ціна карти яка у Вас залишилась) = " + difference + "к<br><br>"
+            + difference + "к = " + calculation + " грн<br>&#9989;";
+
     }
 
     function copyText(elementId) {
@@ -280,13 +335,28 @@
     function updateRates() {
         var consoleRate = document.getElementById("consoleRate").value;
         var pcRate = document.getElementById("pcRate").value;
+        var rate = parseFloat(document.getElementById("rate").value) || 0;
 
         localStorage.setItem("consoleRate", consoleRate);
         localStorage.setItem("pcRate", pcRate);
+        localStorage.setItem("rate", rate);
 
         document.getElementById("consoleRateDisplay").innerText = consoleRate;
         document.getElementById("pcRateDisplay").innerText = pcRate;
+        document.getElementById("rateDisplay").innerText = rate;
+
     }
+    function updateRateText() {
+        var rate = parseFloat(document.getElementById("rate").value) || 0;
+        document.getElementById("rateDisplay").innerText = rate;
+
+        // Оновлюємо текст в myText5
+        var maxPrice = document.getElementById("maxPriceDisplay").innerText || 0;
+        document.getElementById("myText5").innerHTML =
+            `Доброго дня, буде замовлення, потрібно ${maxPrice}к монет, курс ${rate} грн за 100к. Зможете забрати?`;
+    }
+    // Додаємо слухач подій на зміну значення курсу
+    document.getElementById("rate").addEventListener("input", updateRateText);
 
     function changeValue(id, delta) {
         var input = document.getElementById(id);
@@ -306,6 +376,7 @@
         var savedConsolePrice = localStorage.getItem("consolePrice");
         var savedConsoleRate = localStorage.getItem("consoleRate");
         var savedPcRate = localStorage.getItem("pcRate");
+        var savedRate = localStorage.getItem("rate");
 
         if (savedPcPrice !== null) {
             document.getElementById("pcPrice").value = savedPcPrice;
@@ -325,6 +396,10 @@
         if (savedPcRate !== null) {
             document.getElementById("pcRate").value = savedPcRate;
             document.getElementById("pcRateDisplay").innerText = savedPcRate;
+        }
+        if (savedRate !== null) {
+            document.getElementById("rate").value = savedRate;
+            document.getElementById("rate").innerText = savedRate;
         }
     });
 

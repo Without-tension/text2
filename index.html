@@ -243,6 +243,16 @@
         return thirdNumber;
     }
 
+    // Функція для форматування чисел: додає "к" для тисяч, але для чисел >= 1000 показує повне число з пробілами
+    function formatNumber(number) {
+        if (number >= 1000) {
+            // Для чисел 1000 і більше множимо на 1000 і форматуємо з пробілами
+            return (number * 1000).toLocaleString('uk-UA').replace(/,/g, ' ');
+        } else {
+            return number + "к"; // Для чисел менше 1000 додаємо суфікс "к"
+        }
+    }
+
     function changeText() {
         var word = document.getElementById("word").value;
         var firstNumber = parseFloat(document.getElementById("firstNumber").value);
@@ -269,25 +279,25 @@
         var result_thirdNumber = calculateX7(firstNumber, sellnumber);
         thirdNumberElement.value = result_thirdNumber; // Оновлюємо значення "максимальна ціна"
         secondNumberElement.value = randomPrice; // Оновлюємо значення "мінімальна ціна"
-        maxPriceDisplay.innerText = result_thirdNumber; // Вставка значення в текст
+        maxPriceDisplay.innerText = result_thirdNumber; // Вставка значення в текст (без форматування, оскільки formatNumber застосовується в updateRateText)
         var difference = thirdNumber - firstNumber;
         var calculation = (difference * rate)/100;
         // Оновлення курсу в тексті
         rateDisplay.innerText = rate;
 
 
-        myText.innerHTML = "Купіть " + word + " (до " + firstNumber + "к), виставте карту з мінімальною ціною " + randomPrice + "к і максимальною ціною " + result_thirdNumber + "к. Надішліть скрін будь ласка";
+        myText.innerHTML = "Купіть " + word + " (до " + formatNumber(firstNumber) + "), виставте карту з мінімальною ціною " + formatNumber(randomPrice) + " і максимальною ціною " + formatNumber(result_thirdNumber) + ". Надішліть скрін будь ласка";
         myText.className = "blue";
-        myText2.innerHTML = "На ринку є " + word + " з мінімальною ціною " + randomPrice + "к і максимальною ціною " + result_thirdNumber + "к. Викупіть карту та надішліть скрін будь ласка";
+        myText2.innerHTML = "На ринку є " + word + " з мінімальною ціною " + formatNumber(randomPrice) + " і максимальною ціною " + formatNumber(result_thirdNumber) + ". Викупіть карту та надішліть скрін будь ласка";
         myText2.className = "blue";
-        myText3.innerHTML = "На ринку є " + word + " з мінімальною ціною " + randomPrice + "к і максимальною ціною " + forNumber + "к. Поставте ставку " + result_thirdNumber + "к та надішліть скрін будь ласка";
+        myText3.innerHTML = "На ринку є " + word + " з мінімальною ціною " + formatNumber(randomPrice) + " і максимальною ціною " + formatNumber(forNumber) + ". Поставте ставку " + formatNumber(result_thirdNumber) + " та надішліть скрін будь ласка";
         myText3.className = "blue";
-        myText4.innerHTML = "Купіть " + word + " (до " + firstNumber + "к), виставте карту НА 1 ГОДИНУ з мінімальною ціною " + randomPrice + "к і максимальною ціною " + forNumber + "к. Надішліть скрін будь ласка";
+        myText4.innerHTML = "Купіть " + word + " (до " + formatNumber(firstNumber) + "), виставте карту НА 1 ГОДИНУ з мінімальною ціною " + formatNumber(randomPrice) + " і максимальною ціною " + formatNumber(forNumber) + ". Надішліть скрін будь ласка";
         myText4.className = "blue";
         myText5.className = "blue";
         myText9.className = "blue";
-        myText9.innerHTML = thirdNumber + " - " + firstNumber + " (ціна карти яка у Вас залишилась) = " + difference + "к<br><br>"
-            + difference + "к = " + calculation + " грн<br>&#9989;";
+        myText9.innerHTML = formatNumber(thirdNumber) + " - " + formatNumber(firstNumber) + " (ціна карти яка у Вас залишилась) = " + formatNumber(difference) + "<br><br>"
+            + formatNumber(difference) + " = " + calculation + " грн<br>&#9989;";
 
     }
 
@@ -353,7 +363,7 @@
         // Оновлюємо текст в myText5
         var maxPrice = document.getElementById("maxPriceDisplay").innerText || 0;
         document.getElementById("myText5").innerHTML =
-            `Доброго дня, буде замовлення, потрібно ${maxPrice}к монет, курс ${rate} грн за 100к. Зможете забрати?`;
+            `Доброго дня, буде замовлення, потрібно ${formatNumber(maxPrice)} монет, курс ${rate} грн за 100к. Зможете забрати?`;
     }
     // Додаємо слухач подій на зміну значення курсу
     document.getElementById("rate").addEventListener("input", updateRateText);

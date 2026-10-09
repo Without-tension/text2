@@ -225,8 +225,8 @@
         Копіювати картинку і текст
     </button><br>
 
-    <button class="interactive-btn" onclick="copyOnlyImage(event)">
-        Копіювати зображення
+    <button class="interactive-btn" onclick="downloadImage(event)">
+        Завантажити зображення
     </button><br>
 
     <!-- Суцільний текст для голографічної картки -->
@@ -460,29 +460,24 @@
         }, 'image/png');
     }
 
-    // Копіювання виключно зображення
-    async function copyOnlyImage(e) {
+    // Завантаження виключно зображення
+    function downloadImage(e) {
         const clickX = e ? e.clientX : mouseX;
         const clickY = e ? e.clientY : mouseY;
 
-        canvas.toBlob(async (imgBlob) => {
-            if (!imgBlob) {
-                showCursorToast('Помилка генерації картинки', clickX, clickY);
-                return;
-            }
-
-            try {
-                await navigator.clipboard.write([
-                    new ClipboardItem({
-                        'image/png': imgBlob
-                    })
-                ]);
-                showCursorToast('Зображення скопійовано!', clickX, clickY);
-            } catch (err) {
-                console.error(err);
-                showCursorToast('Помилка копіювання зображення', clickX, clickY);
-            }
-        }, 'image/png');
+        try {
+            const cleanName = getCleanPlayerName() || 'market-image';
+            const link = document.createElement('a');
+            link.download = `${cleanName}.png`;
+            link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showCursorToast('Зображення завантажено!', clickX, clickY);
+        } catch (err) {
+            console.error(err);
+            showCursorToast('Помилка завантаження', clickX, clickY);
+        }
     }
 
     // -------------------------------------------------------------

@@ -222,7 +222,11 @@
     <input type="text" id="canvasMaxPrice" oninput="formatPriceInput(this); drawMarketImage(); updateHoloText();"><br>
 
     <button class="interactive-btn" onclick="copyMarketImage(event)">
-        Скопіювати картинку
+        Копіювати картинку і текст
+    </button><br>
+
+    <button class="interactive-btn" onclick="copyOnlyImage(event)">
+        Копіювати зображення
     </button><br>
 
     <!-- Суцільний текст для голографічної картки -->
@@ -452,6 +456,31 @@
                 } catch (fallbackErr) {
                     showCursorToast('Помилка буфера', clickX, clickY);
                 }
+            }
+        }, 'image/png');
+    }
+
+    // Копіювання виключно зображення
+    async function copyOnlyImage(e) {
+        const clickX = e ? e.clientX : mouseX;
+        const clickY = e ? e.clientY : mouseY;
+
+        canvas.toBlob(async (imgBlob) => {
+            if (!imgBlob) {
+                showCursorToast('Помилка генерації картинки', clickX, clickY);
+                return;
+            }
+
+            try {
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        'image/png': imgBlob
+                    })
+                ]);
+                showCursorToast('Зображення скопійовано!', clickX, clickY);
+            } catch (err) {
+                console.error(err);
+                showCursorToast('Помилка копіювання зображення', clickX, clickY);
             }
         }, 'image/png');
     }

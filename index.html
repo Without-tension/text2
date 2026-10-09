@@ -38,11 +38,26 @@
             padding: 0;
             font-weight: bold;
             text-align: center;
+            border: none;
+            box-sizing: border-box;
         }
         button {
             height: 120px;
             cursor: pointer;
+            color: black;
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease, background-color 0.15s ease;
         }
+
+        /* Ефекти наведення та кліку для головних кнопок */
+        .interactive-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+        .interactive-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
         .blue {
             color:#b8bdff;
         }
@@ -52,7 +67,7 @@
         .purple {
             color: #d68fd4;
         }
-        #myText, #myText2, #myText3, #myText4, #myText5, #myText6, #myText7, #myText8, #myText9, #myText10 {
+        #myText, #myText2, #myText3, #myText4, #myText5, #myText6, #myText7, #myText8, #myText9, #myText10, #myHoloText {
             text-indent: 100px;
             font-size: 35px;
             cursor: pointer;
@@ -70,7 +85,7 @@
             }
         }
 
-        /* Новий стиль для кнопок + та - */
+        /* Стиль для кнопок + та - */
         .button-style {
             width: 60px;
             height: 87px;
@@ -82,6 +97,10 @@
             margin: 0 5px;
             padding: 0;
         }
+        .button-style:active {
+            transform: scale(0.92);
+        }
+
         .input-number-style {
             width: 105px !important;
             height: 87px !important;
@@ -104,6 +123,9 @@
             margin: 0 5px;
             padding: 0;
         }
+        .price-group.special .special-btn:active {
+            transform: scale(0.92);
+        }
 
         .price-group.special .special-number {
             width: 105px !important;
@@ -116,9 +138,39 @@
             color: #01402E !important;
             text-align: center !important;
         }
+
+        /* Стиль для охайного прев'ю полотна */
+        #marketCanvas {
+            max-width: 1100px;
+            height: auto;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            margin: 15px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+
+        /* Вспливаюча підказка біля курсора */
+        #cursorToast {
+            position: fixed;
+            display: none;
+            pointer-events: none;
+            background: rgba(14, 20, 30, 0.95);
+            color: #00e676;
+            border: 2px solid #00e676;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 32px;
+            font-weight: bold;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+            z-index: 99999;
+            transform: translate(25px, -15px);
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
+
+<div id="cursorToast">Скопійовано!</div>
+
 <div class="container">
 
     <p id="myText" onclick="copyText('myText')">
@@ -127,7 +179,7 @@
     </p>
 
     <label for="word">Гравець:</label>
-    <input type="text" id="word" name="word">
+    <input type="text" id="word" name="word" oninput="drawMarketImage()">
     <label for="firstNumber">Ринкова ціна:</label>
     <input type="number" id="firstNumber" name="firstNumber">
     <label for="sellnumber">Замовлення:</label>
@@ -138,7 +190,7 @@
         Надішліть скрін будь ласка
     </p>
 
-    <button onclick="changeText()">
+    <button class="interactive-btn" onclick="changeText()">
         Розрахувати та змінити текст
     </button><br>
 
@@ -159,6 +211,22 @@
         На ринку є "гравець" з мінімальною ціною "-"к і максимальною цією "-"к.
         Поставте ставку "-"к та надішліть скрін будь ласка
     </p><br>
+
+    <canvas id="marketCanvas"></canvas><br>
+
+    <!-- Поля для цін на картинці та кнопка копіювання -->
+    <label for="canvasMinPrice">Картинка Min Buy Now:</label>
+    <input type="text" id="canvasMinPrice" oninput="formatPriceInput(this); drawMarketImage(); updateHoloText();">
+
+    <label for="canvasMaxPrice">Картинка Max Buy Now:</label>
+    <input type="text" id="canvasMaxPrice" oninput="formatPriceInput(this); drawMarketImage(); updateHoloText();"><br>
+
+    <button class="interactive-btn" onclick="copyMarketImage(event)">
+        Скопіювати картинку
+    </button><br>
+
+    <!-- Суцільний текст для голографічної картки -->
+    <p id="myHoloText" class="blue" onclick="copyText('myHoloText')">⚠️<strong>Важливо</strong>: потрібна саме <strong>голографічна версія</strong> (з <strong><span style="color: #d68fd4;">🟣 фіолетовим</span> свіченням навколо карти</strong>, як на першому скріні). В EA немає окремого фільтра для них, тому щоб швидко її знайти, виставте фільтр покупки від до (параметри пошуку зображено на другому скріні).</p><br>
 
     <div class="price-group special">
         <label for="rate">Актуальний курс:</label>
@@ -227,117 +295,312 @@
     </p><br>
 </div>
 <div id="result"></div>
+
 <script>
-    // Оголошення функції для обчислення X7
+    // -------------------------------------------------------------
+    // ЛОГІКА СПОВІЩЕННЯ БІЛЯ КУРСОРА
+    // -------------------------------------------------------------
+    let mouseX = 0, mouseY = 0;
+    window.addEventListener('mousemove', function(e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    function showCursorToast(text, x, y) {
+        const toast = document.getElementById('cursorToast');
+        toast.innerText = text;
+        toast.style.left = (x || mouseX) + 'px';
+        toast.style.top = (y || mouseY) + 'px';
+        toast.style.display = 'block';
+
+        clearTimeout(toast.timer);
+        toast.timer = setTimeout(() => {
+            toast.style.display = 'none';
+        }, 1500);
+    }
+
+    // -------------------------------------------------------------
+    // ЛОГІКА РОБОТИ CANVAS ЗОБРАЖЕННЯ
+    // -------------------------------------------------------------
+    const canvas = document.getElementById('marketCanvas');
+    const ctx = canvas.getContext('2d');
+    const baseImg = new Image();
+
+    baseImg.src = 'template.png';
+
+    baseImg.onload = () => {
+        canvas.width = baseImg.naturalWidth;
+        canvas.height = baseImg.naturalHeight;
+        drawMarketImage();
+        updateHoloText();
+    };
+
+    function formatPriceInput(input) {
+        let raw = input.value.replace(/\D/g, '');
+        if (raw) {
+            input.value = Number(raw).toLocaleString('en-US');
+        } else {
+            input.value = '';
+        }
+    }
+
+    function getCleanPlayerName() {
+        const full = document.getElementById('word').value || '';
+        const clean = full.split('-')[0].trim();
+        return clean || '';
+    }
+
+    function updateHoloText() {
+        const minP = document.getElementById('canvasMinPrice').value || '-';
+        const maxP = document.getElementById('canvasMaxPrice').value || '-';
+
+        const holoElem = document.getElementById('myHoloText');
+        if (holoElem) {
+            holoElem.innerHTML = `⚠️<strong>Важливо</strong>: потрібна саме <strong>голографічна версія</strong> (з <strong><span style="color: #d68fd4;">🟣 фіолетовим</span> свіченням навколо карти</strong>, як на першому скріні). В EA немає окремого фільтра для них, тому щоб швидко її знайти, виставте фільтр покупки від ${minP} до ${maxP} (параметри пошуку зображено на другому скріні).`;
+        }
+    }
+
+    function drawMarketImage() {
+        if (!baseImg.complete) return;
+
+        ctx.drawImage(baseImg, 0, 0);
+
+        const name = getCleanPlayerName();
+        const minP = document.getElementById('canvasMinPrice').value || '';
+        const maxP = document.getElementById('canvasMaxPrice').value || '';
+
+        ctx.fillStyle = '#111419';
+        ctx.fillRect(86, 24, 700, 46);
+        ctx.fillRect(116, 760, 380, 48);
+        ctx.fillRect(1095, 760, 380, 48);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.textBaseline = 'middle';
+
+        ctx.font = '600 34px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillText(name, 100, 52);
+
+        ctx.font = '600 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillText(minP, 135, 785);
+        ctx.fillText(maxP, 1112, 785);
+    }
+
+    // -------------------------------------------------------------
+    // ЧИСТЕ ФОРМУВАННЯ ТЕКСТІВ ДЛЯ TELEGRAM
+    // -------------------------------------------------------------
+    function getCleanFirstTextHtml() {
+        var word = document.getElementById("word").value.trim();
+        var firstNumber = parseFloat(document.getElementById("firstNumber").value) || 0;
+        var randomPrice = document.getElementById("secondNumber").value || "-";
+        var result_thirdNumber = document.getElementById("thirdNumber").value || "-";
+
+        var plainFirst = (firstNumber >= 1000) ? (firstNumber * 1000).toLocaleString('uk-UA').replace(/,/g, ' ') : (firstNumber + "к");
+        var boldMin = (randomPrice >= 1000) ? "<b>" + (randomPrice * 1000).toLocaleString('uk-UA').replace(/,/g, ' ') + "</b>" : "<b>" + randomPrice + "к</b>";
+        var boldMax = (result_thirdNumber >= 1000) ? "<b>" + (result_thirdNumber * 1000).toLocaleString('uk-UA').replace(/,/g, ' ') + "</b>" : "<b>" + result_thirdNumber + "к</b>";
+
+        return `Купіть <b>${word}</b> (до ${plainFirst}), виставте карту з мінімальною ціною ${boldMin} і максимальною ціною ${boldMax}. Надішліть скрін будь ласка`;
+    }
+
+    function getCleanHoloTextHtml() {
+        var minP = document.getElementById('canvasMinPrice').value || '-';
+        var maxP = document.getElementById('canvasMaxPrice').value || '-';
+
+        return `⚠️<b>Важливо</b>: потрібна саме <b>голографічна версія</b> (з <b>🟣 фіолетовим свіченням навколо карти</b>, як на першому скріні). В EA немає окремого фільтра для них, тому щоб швидко її знайти, виставте фільтр покупки від ${minP} до ${maxP} (параметри пошуку зображено на другому скріні).`;
+    }
+
+    function stripHtml(html) {
+        return html.replace(/<[^>]+>/g, '');
+    }
+
+    // Копіювання: картинка + чистий HTML-текст без зірочок
+    async function copyMarketImage(e) {
+        const clickX = e ? e.clientX : mouseX;
+        const clickY = e ? e.clientY : mouseY;
+
+        const firstElem = document.getElementById('myText');
+        const holoElem = document.getElementById('myHoloText');
+
+        const t1Html = getCleanFirstTextHtml();
+        const t2Html = getCleanHoloTextHtml();
+        const combinedHtml = `<p>${t1Html}</p><br><p>${t2Html}</p>`;
+        const combinedPlain = stripHtml(t1Html) + "\n\n" + stripHtml(t2Html);
+
+        canvas.toBlob(async (imgBlob) => {
+            if (!imgBlob) {
+                showCursorToast('Помилка генерації картинки', clickX, clickY);
+                return;
+            }
+
+            try {
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        'image/png': imgBlob,
+                        'text/html': new Blob([combinedHtml], { type: 'text/html' }),
+                        'text/plain': new Blob([combinedPlain], { type: 'text/plain' })
+                    })
+                ]);
+
+                if (firstElem) firstElem.className = "purple";
+                if (holoElem) holoElem.className = "purple";
+                showCursorToast('Картинку та текст скопійовано!', clickX, clickY);
+            } catch (err) {
+                try {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': imgBlob })
+                    ]);
+                    showCursorToast('Картинку скопійовано!', clickX, clickY);
+                } catch (fallbackErr) {
+                    showCursorToast('Помилка буфера', clickX, clickY);
+                }
+            }
+        }, 'image/png');
+    }
+
+    // -------------------------------------------------------------
+    // ОСНОВНА ЛОГІКА КАЛЬКУЛЯТОРА ТА РОЗРАХУНКУ ТЕКСТУ
+    // -------------------------------------------------------------
     function calculateX7(firstNumber, sellnumber) {
-        // Розрахунок X3
         var X3 = firstNumber + sellnumber;
-        // Розрахунок X4
         var X4 = X3 * 0.05;
-        // Розрахунок X5
         var X5 = X4 + X3;
-        // Розрахунок X6
         var X6 = X5 * 0.05;
-        // Розрахунок X7
         var thirdNumber = Math.ceil(X6 + X3);
         return thirdNumber;
     }
 
-    // Функція для форматування чисел: додає "к" для тисяч, але для чисел >= 1000 показує повне число з пробілами
-    function formatNumber(number) {
+    function formatPlainNumber(number) {
         if (number >= 1000) {
-            // Для чисел 1000 і більше множимо на 1000 і форматуємо з пробілами
             return (number * 1000).toLocaleString('uk-UA').replace(/,/g, ' ');
         } else {
-            return number + "к"; // Для чисел менше 1000 додаємо суфікс "к"
+            return number + "к";
+        }
+    }
+
+    function formatNumber(number) {
+        if (number >= 1000) {
+            var fullFormatted = (number * 1000).toLocaleString('uk-UA').replace(/,/g, ' ');
+            return "<strong>" + fullFormatted + "</strong>";
+        } else {
+            return "<strong>" + number + "к</strong>";
         }
     }
 
     function changeText() {
         var word = document.getElementById("word").value;
-        var firstNumber = parseFloat(document.getElementById("firstNumber").value);
-        var sellnumber = parseFloat(document.getElementById("sellnumber").value);
-        var secondNumber = parseFloat(document.getElementById("secondNumber").value);
+        var cleanWord = word.trim();
+        var boldPlayer = "<strong>" + cleanWord + "</strong>";
+
+        var firstNumber = parseFloat(document.getElementById("firstNumber").value) || 0;
+        var sellnumber = parseFloat(document.getElementById("sellnumber").value) || 0;
         var secondNumberElement = document.getElementById("secondNumber");
         var thirdNumberElement = document.getElementById("thirdNumber");
-        var thirdNumber = parseFloat(thirdNumberElement.value);
-        var forNumber = parseFloat(document.getElementById("forNumber").value);
-        var rate = parseFloat(document.getElementById("rate").value);
+        var forNumber = parseFloat(document.getElementById("forNumber").value) || 0;
+        var rate = parseFloat(document.getElementById("rate").value) || 0;
         var myText = document.getElementById("myText");
         var myText2 = document.getElementById("myText2");
         var myText3 = document.getElementById("myText3");
         var myText4 = document.getElementById("myText4");
         var maxPriceDisplay = document.getElementById("maxPriceDisplay");
         var myText5 = document.getElementById("myText5");
-        var myText9 =document.getElementById("myText9");
+        var myText9 = document.getElementById("myText9");
 
-        // Генеруємо випадкове число від "ринкової ціни" до 10% від "замовлення"
         var minPrice = firstNumber;
         var maxPrice = firstNumber + (sellnumber * 0.1);
         var randomPrice = Math.floor(Math.random() * (maxPrice - minPrice + 1)) + minPrice;
 
         var result_thirdNumber = calculateX7(firstNumber, sellnumber);
-        thirdNumberElement.value = result_thirdNumber; // Оновлюємо значення "максимальна ціна"
-        secondNumberElement.value = randomPrice; // Оновлюємо значення "мінімальна ціна"
-        maxPriceDisplay.innerText = result_thirdNumber; // Вставка значення в текст (без форматування, оскільки formatNumber застосовується в updateRateText)
-        var difference = thirdNumber - firstNumber;
+        thirdNumberElement.value = result_thirdNumber;
+        secondNumberElement.value = randomPrice;
+        maxPriceDisplay.innerText = result_thirdNumber;
+        var difference = result_thirdNumber - firstNumber;
         var calculation = (difference * rate)/100;
-        // Оновлення курсу в тексті
         rateDisplay.innerText = rate;
 
-
-        myText.innerHTML = "Купіть " + word + " (до " + formatNumber(firstNumber) + "), виставте карту з мінімальною ціною " + formatNumber(randomPrice) + " і максимальною ціною " + formatNumber(result_thirdNumber) + ". Надішліть скрін будь ласка";
+        myText.innerHTML = "Купіть " + boldPlayer + " (до " + formatPlainNumber(firstNumber) + "), виставте карту з мінімальною ціною " + formatNumber(randomPrice) + " і максимальною ціною " + formatNumber(result_thirdNumber) + ". Надішліть скрін будь ласка";
         myText.className = "blue";
-        myText2.innerHTML = "На ринку є " + word + " з мінімальною ціною " + formatNumber(randomPrice) + " і максимальною ціною " + formatNumber(result_thirdNumber) + ". Викупіть карту та надішліть скрін будь ласка";
+
+        myText2.innerHTML = "На ринку є " + boldPlayer + " з мінімальною ціною " + formatNumber(randomPrice) + " і максимальною ціною " + formatNumber(result_thirdNumber) + ". Викупіть карту та надішліть скрін будь ласка";
         myText2.className = "blue";
-        myText3.innerHTML = "На ринку є " + word + " з мінімальною ціною " + formatNumber(randomPrice) + " і максимальною ціною " + formatNumber(forNumber) + ". Поставте ставку " + formatNumber(result_thirdNumber) + " та надішліть скрін будь ласка";
+
+        myText3.innerHTML = "На ринку є " + boldPlayer + " з мінімальною ціною " + formatNumber(randomPrice) + " і максимальною ціною " + formatNumber(forNumber) + ". Поставте ставку " + formatNumber(result_thirdNumber) + " та надішліть скрін будь ласка";
         myText3.className = "blue";
-        myText4.innerHTML = "Купіть " + word + " (до " + formatNumber(firstNumber) + "), виставте карту НА 1 ГОДИНУ з мінімальною ціною " + formatNumber(randomPrice) + " і максимальною ціною " + formatNumber(forNumber) + ". Надішліть скрін будь ласка";
+
+        myText4.innerHTML = "Купіть " + boldPlayer + " (до " + formatPlainNumber(firstNumber) + "), виставте карту НА 1 ГОДИНУ з мінімальною ціною " + formatNumber(randomPrice) + " і максимальною ціною " + formatNumber(forNumber) + ". Надішліть скрін будь ласка";
         myText4.className = "blue";
+
         myText5.className = "blue";
         myText9.className = "blue";
-        myText9.innerHTML = formatNumber(thirdNumber) + " - " + formatNumber(firstNumber) + " (ціна карти яка у Вас залишилась) = " + formatNumber(difference) + "<br><br>"
-            + formatNumber(difference) + " = " + calculation + " грн<br>&#9989;";
+        myText9.innerHTML = formatNumber(result_thirdNumber) + " - " + formatNumber(firstNumber) + " (ціна карти яка у Вас залишилась) = " + formatNumber(difference) + "<br><br>"
+            + formatNumber(difference) + " = <strong>" + calculation + " грн</strong><br>&#9989;";
 
+        drawMarketImage();
+        updateHoloText();
     }
 
-    function copyText(elementId) {
-        var text = document.getElementById(elementId).innerText;
+    async function copyText(elementId) {
+        var el = document.getElementById(elementId);
+        var htmlContent = "";
+
+        if (elementId === 'myText') {
+            htmlContent = getCleanFirstTextHtml();
+        } else if (elementId === 'myHoloText') {
+            htmlContent = getCleanHoloTextHtml();
+        } else {
+            htmlContent = el.innerHTML;
+        }
+
+        var plainText = stripHtml(htmlContent);
+
+        if (navigator.clipboard && window.ClipboardItem) {
+            try {
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        'text/html': new Blob([htmlContent], { type: 'text/html' }),
+                        'text/plain': new Blob([plainText], { type: 'text/plain' })
+                    })
+                ]);
+                el.className = "purple";
+                showCursorToast('Текст скопійовано!');
+                return;
+            } catch (err) {
+                console.warn(err);
+            }
+        }
+
         var textarea = document.createElement("textarea");
-        textarea.textContent = text;
-        textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+        textarea.value = plainText;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
         document.body.appendChild(textarea);
         textarea.select();
         try {
             if (document.execCommand("copy")) {
-                document.getElementById(elementId).className = "purple";
+                el.className = "purple";
+                showCursorToast('Текст скопійовано!');
             }
         } catch (ex) {
-            console.warn("Copy to clipboard failed.", ex);
-            return false;
+            console.warn(ex);
         } finally {
             document.body.removeChild(textarea);
         }
     }
-    // Читаємо дані з localStorage
+
     document.addEventListener('DOMContentLoaded', function() {
         var playerData = localStorage.getItem('playerData');
         if (playerData) {
-            // Заповнюємо поля
             document.getElementById('word').value = playerData;
             document.getElementById('secondNumber').value = playerData;
-
-            // Очищуємо localStorage після зчитування даних
             localStorage.removeItem('playerData');
+            drawMarketImage();
         }
+        updateHoloText();
     });
+
     function updatePrices() {
         var pcPrice = document.getElementById("pcPrice").value;
         var consolePrice = document.getElementById("consolePrice").value;
-
         localStorage.setItem("pcPrice", pcPrice);
         localStorage.setItem("consolePrice", consolePrice);
-
         document.getElementById("pcPriceDisplay").innerText = pcPrice;
         document.getElementById("consolePriceDisplay").innerText = consolePrice;
     }
@@ -346,32 +609,27 @@
         var consoleRate = document.getElementById("consoleRate").value;
         var pcRate = document.getElementById("pcRate").value;
         var rate = parseFloat(document.getElementById("rate").value) || 0;
-
         localStorage.setItem("consoleRate", consoleRate);
         localStorage.setItem("pcRate", pcRate);
         localStorage.setItem("rate", rate);
-
         document.getElementById("consoleRateDisplay").innerText = consoleRate;
         document.getElementById("pcRateDisplay").innerText = pcRate;
         document.getElementById("rateDisplay").innerText = rate;
-
     }
+
     function updateRateText() {
         var rate = parseFloat(document.getElementById("rate").value) || 0;
         document.getElementById("rateDisplay").innerText = rate;
-
-        // Оновлюємо текст в myText5
         var maxPrice = document.getElementById("maxPriceDisplay").innerText || 0;
         document.getElementById("myText5").innerHTML =
             `Доброго дня, буде замовлення, потрібно ${formatNumber(maxPrice)} монет, курс ${rate} грн за 100к. Зможете забрати?`;
     }
-    // Додаємо слухач подій на зміну значення курсу
     document.getElementById("rate").addEventListener("input", updateRateText);
 
     function changeValue(id, delta) {
         var input = document.getElementById(id);
         var newValue = parseInt(input.value) + delta;
-        if (newValue >= 0) { // Перевірка, щоб значення не ставало від'ємним
+        if (newValue >= 0) {
             input.value = newValue;
             if (id.includes("Price")) {
                 updatePrices();
@@ -392,17 +650,14 @@
             document.getElementById("pcPrice").value = savedPcPrice;
             document.getElementById("pcPriceDisplay").innerText = savedPcPrice;
         }
-
         if (savedConsolePrice !== null) {
             document.getElementById("consolePrice").value = savedConsolePrice;
             document.getElementById("consolePriceDisplay").innerText = savedConsolePrice;
         }
-
         if (savedConsoleRate !== null) {
             document.getElementById("consoleRate").value = savedConsoleRate;
             document.getElementById("consoleRateDisplay").innerText = savedConsoleRate;
         }
-
         if (savedPcRate !== null) {
             document.getElementById("pcRate").value = savedPcRate;
             document.getElementById("pcRateDisplay").innerText = savedPcRate;
@@ -415,28 +670,8 @@
 
     document.getElementById("pcPrice").addEventListener("input", updatePrices);
     document.getElementById("consolePrice").addEventListener("input", updatePrices);
-
     document.getElementById("consoleRate").addEventListener("input", updateRates);
     document.getElementById("pcRate").addEventListener("input", updateRates);
-
-    function copyText(elementId) {
-        var text = document.getElementById(elementId).innerText;
-        var textarea = document.createElement("textarea");
-        textarea.textContent = text;
-        textarea.style.position = "fixed";
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-            if (document.execCommand("copy")) {
-                document.getElementById(elementId).className = "purple";
-            }
-        } catch (ex) {
-            console.warn("Copy to clipboard failed.", ex);
-            return false;
-        } finally {
-            document.body.removeChild(textarea);
-        }
-    }
 </script>
 </body>
 </html>
